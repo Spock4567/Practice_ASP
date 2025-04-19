@@ -19,17 +19,11 @@ namespace Practice_ASP.Controllers
         {
             try
             {
-                // Проверка на пустую строку
-                if (string.IsNullOrEmpty(str))
-                {
-                    return BadRequest("Строка не может быть пустой");
-                }
-
                 // Проверка на неподходящие символы
                 var unsuitableChars = _processorService.GetUnsuitableChars(str);
                 if (unsuitableChars.Count > 0)
                 {
-                    return BadRequest($"Строка содержит неподходящие символы: {string.Join(", ", unsuitableChars)}");
+                    return StatusCode(400, $"Строка содержит неподходящие символы: {string.Join(", ", unsuitableChars)}");
                 }
 
                 // Основная обработка
