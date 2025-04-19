@@ -1,0 +1,6 @@
+@Practice_ASP_HostAddress = http://localhost:5195
+
+GET {{Practice_ASP_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
