@@ -26,6 +26,13 @@ namespace Practice_ASP.Controllers
                     return StatusCode(400, $"Строка содержит неподходящие символы: {string.Join(", ", unsuitableChars)}");
                 }
 
+                //Проверка на наличие строки в чёрном списке
+                bool stringIsInBlackList = _processorService.StringIsInBlackList(str);
+                if (stringIsInBlackList)
+                {
+                    return StatusCode(400, "Строка находится в чёрном списке!");
+                }
+
                 // Основная обработка
                 string processedString = _processorService.StringProcessing(str);
 

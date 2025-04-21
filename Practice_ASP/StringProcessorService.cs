@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace Practice_ASP
 {
@@ -12,15 +13,31 @@ namespace Practice_ASP
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<StringProcessorService> _logger;
+        private readonly AppConfig _config;
 
         public StringProcessorService(
-         HttpClient httpClient,
-         ILogger<StringProcessorService> logger)
+       HttpClient httpClient,
+       ILogger<StringProcessorService> logger,
+       IOptions<AppConfig> config)
         {
             _httpClient = httpClient;
             _logger = logger;
+            _config = config.Value;
         }
 
+        //проверка на нахождение строки в чёрном списке
+        public bool StringIsInBlackList(string str)
+        {
+            bool isInBlackList = false;
+            foreach (var word in _config.Settings.BlackList)
+            {
+                if (str.Equals(word))
+                {
+                    isInBlackList = true;
+                }
+            }
+            return isInBlackList;
+        }
 
         // проверка на наличие в строке неподходящих символов
         public List<char> GetUnsuitableChars(string str)
@@ -57,10 +74,12 @@ namespace Practice_ASP
         {
             try
             {
-                string apiUrl = $"http://www.randomnumberapi.com/api/v1.0/random?min=0&max={max}&count=1";
-                string responseString = await _httpClient.GetStringAsync(apiUrl);
+                string apiUrl = $"random?min=0&max={max}&count=1";
+                var response = await _httpClient.GetAsync(apiUrl);
+                response.EnsureSuccessStatusCode();
 
-                int[] numbers = JsonSerializer.Deserialize<int[]>(responseString);
+                var responseString = await response.Content.ReadAsStringAsync();
+                var numbers = JsonSerializer.Deserialize<int[]>(responseString);
                 return numbers[0];
             }
             catch (Exception ex)
