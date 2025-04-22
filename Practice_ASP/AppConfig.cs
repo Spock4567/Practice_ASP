@@ -9,6 +9,7 @@
     public class AppSettings
     {
         public List<string> BlackList { get; set; } = new();
+        public int ParallelLimit { get; set; } = 5;
     }
 
 }
