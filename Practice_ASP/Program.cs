@@ -10,6 +10,13 @@ builder.Services.AddControllers();
 // Добавляем конфигурацию
 builder.Services.Configure<AppConfig>(builder.Configuration);
 
+// Регистрируем ограничитель запросов
+builder.Services.AddSingleton(provider =>
+{
+    var config = provider.GetRequiredService<IOptions<AppConfig>>().Value;
+    return new RequestLimiterService(config.Settings.ParallelLimit);
+});
+
 // Регистрируем HttpClient с конфигурацией
 builder.Services.AddHttpClient<StringProcessorService>((serviceProvider, client) =>
 {

@@ -8,15 +8,25 @@ namespace Practice_ASP.Controllers
     public class StringProcessingController : ControllerBase
     {
         private readonly StringProcessorService _processorService;
+        private readonly RequestLimiterService _requestLimiter;
 
-        public StringProcessingController(StringProcessorService processorService)
+        public StringProcessingController(StringProcessorService processorService,
+            RequestLimiterService requestLimiter)
         {
             _processorService = processorService;
+            _requestLimiter = requestLimiter;
         }
 
         [HttpGet]
         public async Task<IActionResult> ProcessString([FromQuery] string str)
         {
+            // Проверка лимита запросов
+            if (!_requestLimiter.TryAcquireSlot())
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                    "Превышен лимит запросов. Сервис недоступен");
+            }
+
             try
             {
                 // Проверка на неподходящие символы
@@ -66,6 +76,11 @@ namespace Practice_ASP.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Произошла ошибка: {ex.Message}");
+            }
+            finally
+            {
+                //освобождаем слот
+                _requestLimiter.ReleaseSlot();
             }
         }
     }
